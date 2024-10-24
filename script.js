@@ -23,7 +23,7 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
     // 根据选择的项目和在线测量平均值判断误差标准
     if (project === 'so2') {
         if (onlineAverage >= 715) {
-            allowableError = 0.15 * onlineAverage; // 15%误差
+            allowableError = 0.15 * personalMeasurement; // 15%误差，基于实测值
             isRelativeError = true; // 相对误差
             errorMessage = '二氧化硫 浓度≥715mg/m³';
             documentError = '相对误差≤15%';
@@ -32,7 +32,7 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
             errorMessage = '二氧化硫 143mg/m³ ≤ 浓度 < 715mg/m³';
             documentError = '绝对误差≤±57mg/m³';
         } else if (onlineAverage >= 57 && onlineAverage < 143) {
-            allowableError = 0.30 * onlineAverage; // 30%相对误差
+            allowableError = 0.30 * personalMeasurement; // 30%相对误差，基于实测值
             isRelativeError = true;
             errorMessage = '二氧化硫 57mg/m³ ≤ 浓度 < 143mg/m³';
             documentError = '相对误差≤±30%';
@@ -43,7 +43,7 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
         }
     } else if (project === 'no2') {
         if (onlineAverage >= 513) {
-            allowableError = 0.15 * onlineAverage; // 15%误差
+            allowableError = 0.15 * personalMeasurement; // 15%误差，基于实测值
             isRelativeError = true; // 相对误差
             errorMessage = '氮氧化物 浓度≥513mg/m³';
             documentError = '相对误差≤15%';
@@ -52,7 +52,7 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
             errorMessage = '氮氧化物 103mg/m³ ≤ 浓度 < 513mg/m³';
             documentError = '绝对误差≤±41mg/m³';
         } else if (onlineAverage >= 41 && onlineAverage < 103) {
-            allowableError = 0.30 * onlineAverage; // 30%相对误差
+            allowableError = 0.30 * personalMeasurement; // 30%相对误差，基于实测值
             isRelativeError = true;
             errorMessage = '氮氧化物 41mg/m³ ≤ 浓度 < 103mg/m³';
             documentError = '相对误差≤±30%';
@@ -63,12 +63,12 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
         }
     } else if (project === 'flow_rate') {
         if (onlineAverage > 10) {
-            allowableError = 0.10 * onlineAverage; // 相对误差±10%
+            allowableError = 0.10 * personalMeasurement; // 相对误差±10%，基于实测值
             isRelativeError = true;
             errorMessage = '烟气流速 > 10m/s';
             documentError = '相对误差≤10%';
         } else {
-            allowableError = 0.12 * onlineAverage; // 相对误差±12%
+            allowableError = 0.12 * personalMeasurement; // 相对误差±12%，基于实测值
             isRelativeError = true;
             errorMessage = '烟气流速 ≤ 10m/s';
             documentError = '相对误差≤12%';
@@ -79,7 +79,7 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
         documentError = '绝对误差≤±3°C';
     } else if (project === 'oxygen') {
         if (onlineAverage > 5.0) {
-            allowableError = 0.15 * onlineAverage; // 相对误差±15%
+            allowableError = 0.15 * personalMeasurement; // 相对误差±15%，基于实测值
             isRelativeError = true;
             errorMessage = '含氧量 > 5%';
             documentError = '相对误差≤15%';
@@ -90,18 +90,18 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
         }
     } else if (project === 'humidity') {
         if (onlineAverage > 5.0) {
-            allowableError = 0.25 * onlineAverage; // 相对误差±25%
+            allowableError = 0.25 * personalMeasurement; // 相对误差±25%，基于实测值
             isRelativeError = true;
             errorMessage = '含湿量 > 5%';
             documentError = '相对误差≤25%';
         } else {
-            allowableError = 0.015 * onlineAverage; // 绝对误差±1.5%
+            allowableError = 0.015 * personalMeasurement; // 绝对误差±1.5%，基于实测值
             errorMessage = '含湿量 ≤ 5%';
             documentError = '绝对误差≤±1.5%';
         }
     } else if (project === 'particles') {
         if (onlineAverage >= 200) {
-            allowableError = 0.15 * onlineAverage; // 相对误差±15%
+            allowableError = 0.15 * personalMeasurement; // 相对误差±15%，基于实测值
             isRelativeError = true;
             errorMessage = '颗粒物 浓度≥200mg/m³';
             documentError = '相对误差≤15%';
@@ -110,12 +110,12 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
             errorMessage = '颗粒物 100mg/m³ ≤ 浓度 < 200mg/m³';
             documentError = '绝对误差≤±2mg/m³';
         } else if (onlineAverage >= 50 && onlineAverage < 100) {
-            allowableError = 0.25 * onlineAverage; // 相对误差±25%
+            allowableError = 0.25 * personalMeasurement; // 相对误差±25%，基于实测值
             isRelativeError = true;
             errorMessage = '颗粒物 50mg/m³ ≤ 浓度 < 100mg/m³';
             documentError = '相对误差≤25%';
         } else if (onlineAverage >= 20 && onlineAverage < 50) {
-            allowableError = 0.30 * onlineAverage; // 相对误差±30%
+            allowableError = 0.30 * personalMeasurement; // 相对误差±30%，基于实测值
             isRelativeError = true;
             errorMessage = '颗粒物 20mg/m³ ≤ 浓度 < 50mg/m³';
             documentError = '相对误差≤30%';
@@ -125,14 +125,19 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
             documentError = '绝对误差≤±6mg/m³';
         }
     } else if (project === 'other_gas') {
-        allowableError = 0.15 * onlineAverage; // 其它气态污染物，相对误差±15%
+        allowableError = 0.15 * personalMeasurement; // 其它气态污染物，相对误差±15%，基于实测值
         isRelativeError = true;
         errorMessage = '其它气态污染物';
         documentError = '相对误差≤15%';
     }
 
     // 计算误差
-    const error = Math.abs(onlineAverage - personalMeasurement);
+    let error = 0;
+    if (isRelativeError) {
+        error = Math.abs((onlineAverage - personalMeasurement) / personalMeasurement); // 相对误差
+    } else {
+        error = Math.abs(onlineAverage - personalMeasurement); // 绝对误差
+    }
 
     const resultElement = document.getElementById('result');
 
@@ -145,6 +150,7 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
         标准误差: ${allowableError.toFixed(5)}<br>
         现在的误差: ${error.toFixed(5)}<br>
         测量类别: ${errorMessage}<br>
+        误差类型: ${isRelativeError ? '相对误差' : '绝对误差'}<br>
     `;
 
     if (error <= allowableError) {
