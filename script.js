@@ -15,6 +15,7 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
     // 计算在线测量的平均值
     const onlineAverage = onlineMeasurements.reduce((acc, val) => acc + val, 0) / onlineMeasurements.length;
 
+    let allowableErrorPercentage = 0; // 用于相对误差的百分比标准
     let allowableError = 0;
     let errorMessage = '';
     let documentError = '';
@@ -23,8 +24,8 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
     // 根据选择的项目和在线测量平均值判断误差标准
     if (project === 'so2') {
         if (onlineAverage >= 715) {
-            allowableError = 0.15 * personalMeasurement; // 15%误差，基于实测值
-            isRelativeError = true; // 相对误差
+            allowableErrorPercentage = 15; // 相对误差15%
+            isRelativeError = true;
             errorMessage = '二氧化硫 浓度≥715mg/m³';
             documentError = '相对误差≤15%';
         } else if (onlineAverage >= 143 && onlineAverage < 715) {
@@ -32,7 +33,7 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
             errorMessage = '二氧化硫 143mg/m³ ≤ 浓度 < 715mg/m³';
             documentError = '绝对误差≤±57mg/m³';
         } else if (onlineAverage >= 57 && onlineAverage < 143) {
-            allowableError = 0.30 * personalMeasurement; // 30%相对误差，基于实测值
+            allowableErrorPercentage = 30; // 相对误差30%
             isRelativeError = true;
             errorMessage = '二氧化硫 57mg/m³ ≤ 浓度 < 143mg/m³';
             documentError = '相对误差≤±30%';
@@ -43,8 +44,8 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
         }
     } else if (project === 'no2') {
         if (onlineAverage >= 513) {
-            allowableError = 0.15 * personalMeasurement; // 15%误差，基于实测值
-            isRelativeError = true; // 相对误差
+            allowableErrorPercentage = 15; // 相对误差15%
+            isRelativeError = true;
             errorMessage = '氮氧化物 浓度≥513mg/m³';
             documentError = '相对误差≤15%';
         } else if (onlineAverage >= 103 && onlineAverage < 513) {
@@ -52,7 +53,7 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
             errorMessage = '氮氧化物 103mg/m³ ≤ 浓度 < 513mg/m³';
             documentError = '绝对误差≤±41mg/m³';
         } else if (onlineAverage >= 41 && onlineAverage < 103) {
-            allowableError = 0.30 * personalMeasurement; // 30%相对误差，基于实测值
+            allowableErrorPercentage = 30; // 相对误差30%
             isRelativeError = true;
             errorMessage = '氮氧化物 41mg/m³ ≤ 浓度 < 103mg/m³';
             documentError = '相对误差≤±30%';
@@ -63,12 +64,12 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
         }
     } else if (project === 'flow_rate') {
         if (onlineAverage > 10) {
-            allowableError = 0.10 * personalMeasurement; // 相对误差±10%，基于实测值
+            allowableErrorPercentage = 10; // 相对误差10%
             isRelativeError = true;
             errorMessage = '烟气流速 > 10m/s';
             documentError = '相对误差≤10%';
         } else {
-            allowableError = 0.12 * personalMeasurement; // 相对误差±12%，基于实测值
+            allowableErrorPercentage = 12; // 相对误差12%
             isRelativeError = true;
             errorMessage = '烟气流速 ≤ 10m/s';
             documentError = '相对误差≤12%';
@@ -79,7 +80,7 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
         documentError = '绝对误差≤±3°C';
     } else if (project === 'oxygen') {
         if (onlineAverage > 5.0) {
-            allowableError = 0.15 * personalMeasurement; // 相对误差±15%，基于实测值
+            allowableErrorPercentage = 15; // 相对误差15%
             isRelativeError = true;
             errorMessage = '含氧量 > 5%';
             documentError = '相对误差≤15%';
@@ -90,18 +91,19 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
         }
     } else if (project === 'humidity') {
         if (onlineAverage > 5.0) {
-            allowableError = 0.25 * personalMeasurement; // 相对误差±25%，基于实测值
+            allowableErrorPercentage = 25; // 相对误差25%
             isRelativeError = true;
             errorMessage = '含湿量 > 5%';
             documentError = '相对误差≤25%';
         } else {
-            allowableError = 0.015 * personalMeasurement; // 绝对误差±1.5%，基于实测值
+            allowableErrorPercentage = 1.5; // 相对误差1.5%
+            isRelativeError = true;
             errorMessage = '含湿量 ≤ 5%';
-            documentError = '绝对误差≤±1.5%';
+            documentError = '相对误差≤±1.5%';
         }
     } else if (project === 'particles') {
         if (onlineAverage >= 200) {
-            allowableError = 0.15 * personalMeasurement; // 相对误差±15%，基于实测值
+            allowableErrorPercentage = 15; // 相对误差15%
             isRelativeError = true;
             errorMessage = '颗粒物 浓度≥200mg/m³';
             documentError = '相对误差≤15%';
@@ -110,12 +112,12 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
             errorMessage = '颗粒物 100mg/m³ ≤ 浓度 < 200mg/m³';
             documentError = '绝对误差≤±2mg/m³';
         } else if (onlineAverage >= 50 && onlineAverage < 100) {
-            allowableError = 0.25 * personalMeasurement; // 相对误差±25%，基于实测值
+            allowableErrorPercentage = 25; // 相对误差25%
             isRelativeError = true;
             errorMessage = '颗粒物 50mg/m³ ≤ 浓度 < 100mg/m³';
             documentError = '相对误差≤25%';
         } else if (onlineAverage >= 20 && onlineAverage < 50) {
-            allowableError = 0.30 * personalMeasurement; // 相对误差±30%，基于实测值
+            allowableErrorPercentage = 30; // 相对误差30%
             isRelativeError = true;
             errorMessage = '颗粒物 20mg/m³ ≤ 浓度 < 50mg/m³';
             documentError = '相对误差≤30%';
@@ -125,39 +127,49 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
             documentError = '绝对误差≤±6mg/m³';
         }
     } else if (project === 'other_gas') {
-        allowableError = 0.15 * personalMeasurement; // 其它气态污染物，相对误差±15%，基于实测值
+        allowableErrorPercentage = 15; // 相对误差15%
         isRelativeError = true;
         errorMessage = '其它气态污染物';
         documentError = '相对误差≤15%';
     }
 
-    // 计算误差
+
+// 计算误差
     let error = 0;
     if (isRelativeError) {
-        error = Math.abs((onlineAverage - personalMeasurement) / personalMeasurement); // 相对误差
+        error = Math.abs((onlineAverage - personalMeasurement) / personalMeasurement) * 100; // 相对误差，单位为百分比
     } else {
         error = Math.abs(onlineAverage - personalMeasurement); // 绝对误差
     }
 
+    // 输出结果处理
     const resultElement = document.getElementById('result');
-
-    // 显示详细结果，精确到小数点后五位
     let output = `
         <strong>结果详情：</strong><br>
         在线测量平均值: ${onlineAverage.toFixed(5)}<br>
         本人测量值: ${personalMeasurement.toFixed(5)}<br>
         文档要求的误差: ${documentError}<br>
-        标准误差: ${allowableError.toFixed(5)}<br>
-        现在的误差: ${error.toFixed(5)}<br>
+        标准误差: ${isRelativeError ? allowableErrorPercentage + '%' : allowableError.toFixed(5)}<br>
+        现在的误差: ${isRelativeError ? error.toFixed(1) + '%' : error.toFixed(5)}<br>
         测量类别: ${errorMessage}<br>
         误差类型: ${isRelativeError ? '相对误差' : '绝对误差'}<br>
     `;
 
-    if (error <= allowableError) {
-        output += `<span style="color: green;">合格</span>`;
+    // 判断是否合格
+    if (isRelativeError) {
+        if (error <= allowableErrorPercentage) {
+            output += `<span style="color: green;">合格</span>`;
+        } else {
+            output += `<span style="color: red;">不合格</span>`;
+        }
     } else {
-        output += `<span style="color: red;">不合格</span>`;
+        if (error <= allowableError) {
+            output += `<span style="color: green;">合格</span>`;
+        } else {
+            output += `<span style="color: red;">不合格</span>`;
+        }
     }
 
+    // 显示结果
     resultElement.innerHTML = output;
 });
