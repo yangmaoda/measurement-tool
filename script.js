@@ -1,3 +1,24 @@
+// 获取输入框和表单元素
+const inputs = [
+    document.getElementById('online1'),
+    document.getElementById('online2'),
+    document.getElementById('online3'),
+    document.getElementById('online4'),
+    document.getElementById('online5'),
+    document.getElementById('personal')
+];
+
+// 添加项目切换事件监听
+document.getElementById('project').addEventListener('change', function() {
+    // 清空所有输入框的值
+    inputs.forEach(input => {
+        input.value = '';
+    });
+
+    // 清空结果显示
+    document.getElementById('result').innerHTML = '';
+});
+
 document.getElementById('measurementForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
