@@ -118,7 +118,6 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
             documentError = '相对误差≤25%';
         } else {
             allowableErrorPercentage = 1.5; // 相对误差1.5%
-            isRelativeError = true;
             errorMessage = '含湿量 ≤ 5%';
             documentError = '相对误差≤±1.5%';
         }
