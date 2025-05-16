@@ -117,9 +117,9 @@ document.getElementById('measurementForm').addEventListener('submit', function(e
             errorMessage = '含湿量 > 5%';
             documentError = '相对误差≤25%';
         } else {
-            allowableErrorPercentage = 1.5; // 相对误差1.5%
+            allowableError = 1.5; // 绝对误差1.5%
             errorMessage = '含湿量 ≤ 5%';
-            documentError = '相对误差≤±1.5%';
+            documentError = '绝对误差≤±1.5%';
         }
     } else if (project === 'particles') {
         if (onlineAverage >= 200) {
