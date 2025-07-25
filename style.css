@@ -38,13 +38,14 @@ label {
     margin-bottom: 5px;
 }
 
-input[type="number"], select {
+/* [修改] 将 input[type="text"] 添加到选择器中 */
+input[type="number"], input[type="text"], select {
     width: 100%;
     padding: 10px;
     margin-bottom: 20px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    box-sizing: border-box;
+    box-sizing: border-box; /* 确保 padding 不会影响总宽度 */
     font-size: 16px;
 }
 

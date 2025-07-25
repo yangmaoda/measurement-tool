@@ -38,22 +38,85 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
-    // --- 计算器一：约分计算 (四舍六入五成双) ---
+    // --- 计算器一：烟气折算 (批量处理版) ---
+    noxConversionForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // 1. 获取输入值
+        const stdO2 = parseFloat(standardOxygenInput.value);
+
+        const meaO2Array = measuredOxygenInput.value.split('/')
+            .map(s => s.trim())
+            .filter(s => s !== '')
+            .map(parseFloat);
+
+        const meaValArray = measuredValueInput.value.split('/')
+            .map(s => s.trim())
+            .filter(s => s !== '')
+            .map(parseFloat);
+
+        // 2. 输入验证
+        if (isNaN(stdO2)) {
+            noxResultEl.innerHTML = `<span style="color: red;">请输入有效的“基准氧含量”！</span>`;
+            return;
+        }
+
+        if (meaO2Array.length === 0 || meaValArray.length === 0) {
+            noxResultEl.innerHTML = `<span style="color: red;">“实测氧含量”和“实测数值”不能为空！</span>`;
+            return;
+        }
+
+        if (meaO2Array.length !== meaValArray.length) {
+            noxResultEl.innerHTML = `<span style="color: red;">错误：“实测氧含量”的个数 (${meaO2Array.length}) 与 “实测数值”的个数 (${meaValArray.length}) 必须一一对应！</span>`;
+            return;
+        }
+
+        if (meaO2Array.some(isNaN) || meaValArray.some(isNaN)) {
+            noxResultEl.innerHTML = `<span style="color: red;">错误：请确保所有输入的数值都是有效的数字，并用'/'隔开。</span>`;
+            return;
+        }
+
+        // 3. 循环计算并格式化输出
+        let outputHtml = '<strong>批量计算结果：</strong><br><ol style="text-align: left; margin-top: 10px;">';
+        let hasError = false;
+
+        for (let i = 0; i < meaO2Array.length; i++) {
+            const currentMeaO2 = meaO2Array[i];
+            const currentMeaVal = meaValArray[i];
+
+            if (21 - currentMeaO2 === 0) {
+                outputHtml += `<li>第 ${i + 1} 组计算: <span style="color: red;">错误！实测氧含量不能为21。</span></li>`;
+                hasError = true;
+                continue;
+            }
+
+            const result = (21 - stdO2) / (21 - currentMeaO2) * currentMeaVal;
+
+            // [修改] 只输出结果，不显示计算过程
+            outputHtml += `<li>第 ${i + 1} 组结果: <strong style="color: #0056b3;">${result.toFixed(5)}</strong></li>`;
+        }
+
+        outputHtml += '</ol>';
+
+        if (hasError) {
+             outputHtml += '<p style="color:red; font-size: 14px; text-align: center;">已跳过计算中出错的项目。</p>';
+        }
+
+        noxResultEl.innerHTML = outputHtml;
+    });
+
+
+    // --- 计算器二：约分计算 (四舍六入五成双) ---
     function roundHalfToEven(value) {
         const decimal = value % 1;
-        // 对于 .5 的情况
         if (Math.abs(decimal) === 0.5) {
             const integerPart = Math.floor(Math.abs(value));
-            // 如果整数部分是偶数，则向它取整 (即舍去.5)
             if (integerPart % 2 === 0) {
-                return Math.trunc(value); // Math.trunc直接去掉小数部分
-            } 
-            // 如果整数部分是奇数，则远离0取整 (即进位.5)
-            else {
-                return Math.round(value); 
+                return Math.trunc(value);
+            } else {
+                return Math.round(value);
             }
         }
-        // 其他情况正常四舍五入
         return Math.round(value);
     }
 
@@ -68,32 +131,6 @@ document.addEventListener('DOMContentLoaded', function() {
         roundingResultEl.innerHTML = `
             输入值: ${value}<br>
             <strong>修约后结果: ${result}</strong>
-        `;
-    });
-
-
-    // --- 计算器二：烟气折算 ---
-    noxConversionForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const stdO2 = parseFloat(standardOxygenInput.value);
-        const meaO2 = parseFloat(measuredOxygenInput.value);
-        const meaVal = parseFloat(measuredValueInput.value);
-
-        if (isNaN(stdO2) || isNaN(meaO2) || isNaN(meaVal)) {
-            noxResultEl.innerHTML = `<span style="color: red;">所有输入框都必须是有效的数字！</span>`;
-            return;
-        }
-
-        if (21 - meaO2 === 0) {
-            noxResultEl.innerHTML = `<span style="color: red;">错误：实测氧含量不能等于21！</span>`;
-            return;
-        }
-
-        const result = ((21 - stdO2) / (21 - meaO2))* meaVal;
-        noxResultEl.innerHTML = `
-            <strong>计算详情：</strong><br>
-            计算公式: (21 - ${stdO2}) / (21 - ${meaO2}) * ${meaVal}<br>
-            <strong style="font-size: 1.2em;">计算结果: ${result.toFixed(5)}</strong>
         `;
     });
 

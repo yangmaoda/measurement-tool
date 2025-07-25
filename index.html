@@ -58,16 +58,18 @@
 
         <!-- 计算项一：烟气折算 -->
         <form id="noxConversionForm">
-            <h2>氮氧化物折算</h2>
+            <h2>烟气折算</h2>
             <p class="description">根据公式 (21-基准氧)/(21-实测氧) * 实测数 进行计算。</p>
             <label for="standardOxygen">输入基准氧含量(%):</label>
             <input type="number" id="standardOxygen" step="any" required>
 
             <label for="measuredOxygen">输入实测氧含量(%):</label>
-            <input type="number" id="measuredOxygen" step="any" required>
+            <!-- [修改] type 从 "number" 变为 "text" 以允许输入斜杠 -->
+            <input type="text" id="measuredOxygen" required placeholder="例如: 6.1 / 6.2 / 6.3">
 
             <label for="measuredValue">输入氮氧化物实测数值:</label>
-            <input type="number" id="measuredValue" step="any" required>
+            <!-- [修改] type 从 "number" 变为 "text" 以允许输入斜杠 -->
+            <input type="text" id="measuredValue" required placeholder="例如: 100 / 102 / 105">
 
             <button type="submit">计算折算值</button>
         </form>
