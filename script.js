@@ -1,195 +1,175 @@
-// 获取输入框和表单元素
-const inputs = [
-    document.getElementById('online1'),
-    document.getElementById('online2'),
-    document.getElementById('online3'),
-    document.getElementById('online4'),
-    document.getElementById('online5'),
-    document.getElementById('personal')
-];
+document.addEventListener('DOMContentLoaded', function() {
 
-// 添加项目切换事件监听
-document.getElementById('project').addEventListener('change', function() {
-    // 清空所有输入框的值
-    inputs.forEach(input => {
-        input.value = '';
+    // --- DOM 元素获取 ---
+    const projectSelect = document.getElementById('project');
+    const comparisonToolDiv = document.getElementById('comparisonTool');
+    const conversionToolDiv = document.getElementById('conversionTool');
+
+    // 比对工具的表单和结果
+    const measurementForm = document.getElementById('measurementForm');
+    const comparisonResultEl = document.getElementById('comparisonResult');
+
+    // 约分计算器的表单和结果
+    const roundingForm = document.getElementById('roundingForm');
+    const roundingInput = document.getElementById('roundingInput');
+    const roundingResultEl = document.getElementById('roundingResult');
+
+    // 烟气折算计算器的表单和结果
+    const noxConversionForm = document.getElementById('noxConversionForm');
+    const standardOxygenInput = document.getElementById('standardOxygen');
+    const measuredOxygenInput = document.getElementById('measuredOxygen');
+    const measuredValueInput = document.getElementById('measuredValue');
+    const noxResultEl = document.getElementById('noxResult');
+
+    // --- 核心功能：切换工具界面 ---
+    projectSelect.addEventListener('change', function() {
+        // 清空所有结果显示
+        comparisonResultEl.innerHTML = '';
+        roundingResultEl.innerHTML = '';
+        noxResultEl.innerHTML = '';
+
+        if (projectSelect.value === 'conversion') {
+            comparisonToolDiv.style.display = 'none';
+            conversionToolDiv.style.display = 'block';
+        } else {
+            comparisonToolDiv.style.display = 'block';
+            conversionToolDiv.style.display = 'none';
+        }
     });
 
-    // 清空结果显示
-    document.getElementById('result').innerHTML = '';
-});
 
-document.getElementById('measurementForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    // 获取用户输入的数值
-    const onlineMeasurements = [
-        parseFloat(document.getElementById('online1').value),
-        parseFloat(document.getElementById('online2').value),
-        parseFloat(document.getElementById('online3').value),
-        parseFloat(document.getElementById('online4').value),
-        parseFloat(document.getElementById('online5').value),
-    ];
-    const personalMeasurement = parseFloat(document.getElementById('personal').value);
-    const project = document.getElementById('project').value;
-
-    // 计算在线测量的平均值
-    const onlineAverage = onlineMeasurements.reduce((acc, val) => acc + val, 0) / onlineMeasurements.length;
-
-    let allowableErrorPercentage = 0; // 用于相对误差的百分比标准
-    let allowableError = 0;
-    let errorMessage = '';
-    let documentError = '';
-    let isRelativeError = false; // 默认是绝对误差
-
-    // 根据选择的项目和在线测量平均值判断误差标准
-    if (project === 'so2') {
-        if (onlineAverage >= 715) {
-            allowableErrorPercentage = 15; // 相对误差15%
-            isRelativeError = true;
-            errorMessage = '二氧化硫 浓度≥715mg/m³';
-            documentError = '相对误差≤15%';
-        } else if (onlineAverage >= 143 && onlineAverage < 715) {
-            allowableError = 57; // 绝对误差±57mg/m³
-            errorMessage = '二氧化硫 143mg/m³ ≤ 浓度 < 715mg/m³';
-            documentError = '绝对误差≤±57mg/m³';
-        } else if (onlineAverage >= 57 && onlineAverage < 143) {
-            allowableErrorPercentage = 30; // 相对误差30%
-            isRelativeError = true;
-            errorMessage = '二氧化硫 57mg/m³ ≤ 浓度 < 143mg/m³';
-            documentError = '相对误差≤±30%';
-        } else if (onlineAverage < 57) {
-            allowableError = 17; // 绝对误差±17mg/m³
-            errorMessage = '二氧化硫 浓度 < 57mg/m³';
-            documentError = '绝对误差≤±17mg/m³';
+    // --- 计算器一：约分计算 (四舍六入五成双) ---
+    function roundHalfToEven(value) {
+        const decimal = value % 1;
+        // 对于 .5 的情况
+        if (Math.abs(decimal) === 0.5) {
+            const integerPart = Math.floor(Math.abs(value));
+            // 如果整数部分是偶数，则向它取整 (即舍去.5)
+            if (integerPart % 2 === 0) {
+                return Math.trunc(value); // Math.trunc直接去掉小数部分
+            } 
+            // 如果整数部分是奇数，则远离0取整 (即进位.5)
+            else {
+                return Math.round(value); 
+            }
         }
-    } else if (project === 'no2') {
-        if (onlineAverage >= 513) {
-            allowableErrorPercentage = 15; // 相对误差15%
-            isRelativeError = true;
-            errorMessage = '氮氧化物 浓度≥513mg/m³';
-            documentError = '相对误差≤15%';
-        } else if (onlineAverage >= 103 && onlineAverage < 513) {
-            allowableError = 41; // 绝对误差±41mg/m³
-            errorMessage = '氮氧化物 103mg/m³ ≤ 浓度 < 513mg/m³';
-            documentError = '绝对误差≤±41mg/m³';
-        } else if (onlineAverage >= 41 && onlineAverage < 103) {
-            allowableErrorPercentage = 30; // 相对误差30%
-            isRelativeError = true;
-            errorMessage = '氮氧化物 41mg/m³ ≤ 浓度 < 103mg/m³';
-            documentError = '相对误差≤±30%';
-        } else if (onlineAverage < 41) {
-            allowableError = 12; // 绝对误差±12mg/m³
-            errorMessage = '氮氧化物 浓度 < 41mg/m³';
-            documentError = '绝对误差≤±12mg/m³';
-        }
-    } else if (project === 'flow_rate') {
-        if (onlineAverage > 10) {
-            allowableErrorPercentage = 10; // 相对误差10%
-            isRelativeError = true;
-            errorMessage = '烟气流速 > 10m/s';
-            documentError = '相对误差≤10%';
-        } else {
-            allowableErrorPercentage = 12; // 相对误差12%
-            isRelativeError = true;
-            errorMessage = '烟气流速 ≤ 10m/s';
-            documentError = '相对误差≤12%';
-        }
-    } else if (project === 'temperature') {
-        allowableError = 3; // 绝对误差±3°C
-        errorMessage = '烟气温度';
-        documentError = '绝对误差≤±3°C';
-    } else if (project === 'oxygen') {
-        if (onlineAverage > 5.0) {
-            allowableErrorPercentage = 15; // 相对误差15%
-            isRelativeError = true;
-            errorMessage = '含氧量 > 5%';
-            documentError = '相对误差≤15%';
-        } else {
-            allowableError = 1.0; // 绝对误差±1.0%
-            errorMessage = '含氧量 ≤ 5%';
-            documentError = '绝对误差≤±1.0%';
-        }
-    } else if (project === 'humidity') {
-        if (onlineAverage > 5.0) {
-            allowableErrorPercentage = 25; // 相对误差25%
-            isRelativeError = true;
-            errorMessage = '含湿量 > 5%';
-            documentError = '相对误差≤25%';
-        } else {
-            allowableError = 1.5; // 绝对误差1.5%
-            errorMessage = '含湿量 ≤ 5%';
-            documentError = '绝对误差≤±1.5%';
-        }
-    } else if (project === 'particles') {
-        if (onlineAverage >= 200) {
-            allowableErrorPercentage = 15; // 相对误差15%
-            isRelativeError = true;
-            errorMessage = '颗粒物 浓度≥200mg/m³';
-            documentError = '相对误差≤15%';
-        } else if (onlineAverage >= 100 && onlineAverage < 200) {
-            allowableError = 2; // 绝对误差±2mg/m³
-            errorMessage = '颗粒物 100mg/m³ ≤ 浓度 < 200mg/m³';
-            documentError = '绝对误差≤±2mg/m³';
-        } else if (onlineAverage >= 50 && onlineAverage < 100) {
-            allowableErrorPercentage = 25; // 相对误差25%
-            isRelativeError = true;
-            errorMessage = '颗粒物 50mg/m³ ≤ 浓度 < 100mg/m³';
-            documentError = '相对误差≤25%';
-        } else if (onlineAverage >= 20 && onlineAverage < 50) {
-            allowableErrorPercentage = 30; // 相对误差30%
-            isRelativeError = true;
-            errorMessage = '颗粒物 20mg/m³ ≤ 浓度 < 50mg/m³';
-            documentError = '相对误差≤30%';
-        } else if (onlineAverage < 20) {
-            allowableError = 6; // 绝对误差±6mg/m³
-            errorMessage = '颗粒物 浓度 < 20mg/m³';
-            documentError = '绝对误差≤±6mg/m³';
-        }
-    } else if (project === 'other_gas') {
-        allowableErrorPercentage = 15; // 相对误差15%
-        isRelativeError = true;
-        errorMessage = '其它气态污染物';
-        documentError = '相对误差≤15%';
+        // 其他情况正常四舍五入
+        return Math.round(value);
     }
 
-
-// 计算误差
-    let error = 0;
-    if (isRelativeError) {
-        error = Math.abs((onlineAverage - personalMeasurement) / personalMeasurement) * 100; // 相对误差，单位为百分比
-    } else {
-        error = Math.abs(onlineAverage - personalMeasurement); // 绝对误差
-    }
-
-    // 输出结果处理
-    const resultElement = document.getElementById('result');
-    let output = `
-        <strong>结果详情：</strong><br>
-        在线测量平均值: ${onlineAverage.toFixed(5)}<br>
-        本人测量值: ${personalMeasurement.toFixed(5)}<br>
-        文档要求的误差: ${documentError}<br>
-        标准误差: ${isRelativeError ? allowableErrorPercentage + '%' : allowableError.toFixed(5)}<br>
-        现在的误差: ${isRelativeError ? error.toFixed(1) + '%' : error.toFixed(5)}<br>
-        测量类别: ${errorMessage}<br>
-        误差类型: ${isRelativeError ? '相对误差' : '绝对误差'}<br>
-    `;
-
-    // 判断是否合格
-    if (isRelativeError) {
-        if (error <= allowableErrorPercentage) {
-            output += `<span style="color: green;">合格</span>`;
-        } else {
-            output += `<span style="color: red;">不合格</span>`;
+    roundingForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const value = parseFloat(roundingInput.value);
+        if (isNaN(value)) {
+            roundingResultEl.innerHTML = `<span style="color: red;">请输入一个有效的数字！</span>`;
+            return;
         }
-    } else {
-        if (error <= allowableError) {
-            output += `<span style="color: green;">合格</span>`;
-        } else {
-            output += `<span style="color: red;">不合格</span>`;
-        }
-    }
+        const result = roundHalfToEven(value);
+        roundingResultEl.innerHTML = `
+            输入值: ${value}<br>
+            <strong>修约后结果: ${result}</strong>
+        `;
+    });
 
-    // 显示结果
-    resultElement.innerHTML = output;
+
+    // --- 计算器二：烟气折算 ---
+    noxConversionForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const stdO2 = parseFloat(standardOxygenInput.value);
+        const meaO2 = parseFloat(measuredOxygenInput.value);
+        const meaVal = parseFloat(measuredValueInput.value);
+
+        if (isNaN(stdO2) || isNaN(meaO2) || isNaN(meaVal)) {
+            noxResultEl.innerHTML = `<span style="color: red;">所有输入框都必须是有效的数字！</span>`;
+            return;
+        }
+
+        if (21 - meaO2 === 0) {
+            noxResultEl.innerHTML = `<span style="color: red;">错误：实测氧含量不能等于21！</span>`;
+            return;
+        }
+
+        const result = ((21 - stdO2) / (21 - meaO2))* meaVal;
+        noxResultEl.innerHTML = `
+            <strong>计算详情：</strong><br>
+            计算公式: (21 - ${stdO2}) / (21 - ${meaO2}) * ${meaVal}<br>
+            <strong style="font-size: 1.2em;">计算结果: ${result.toFixed(5)}</strong>
+        `;
+    });
+
+
+    // --- 原有的测量比对工具逻辑 ---
+    measurementForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const onlineMeasurements = [
+            parseFloat(document.getElementById('online1').value),
+            parseFloat(document.getElementById('online2').value),
+            parseFloat(document.getElementById('online3').value),
+            parseFloat(document.getElementById('online4').value),
+            parseFloat(document.getElementById('online5').value),
+        ];
+        const personalMeasurement = parseFloat(document.getElementById('personal').value);
+        const project = projectSelect.value;
+
+        if (onlineMeasurements.some(isNaN) || isNaN(personalMeasurement)) {
+            comparisonResultEl.innerHTML = `<span style="color: red;">请输入所有必需的测量值！</span>`;
+            return;
+        }
+
+        const onlineAverage = onlineMeasurements.reduce((acc, val) => acc + val, 0) / onlineMeasurements.length;
+
+        let allowableErrorPercentage = 0, allowableError = 0;
+        let errorMessage = '', documentError = '';
+        let isRelativeError = false;
+
+        // ... (此处为完整的if-else判断逻辑，与您原始代码相同，无需修改)
+        if (project === 'so2') {
+            if (onlineAverage >= 715) { allowableErrorPercentage = 15; isRelativeError = true; errorMessage = '二氧化硫 浓度≥715mg/m³'; documentError = '相对误差≤15%'; } 
+            else if (onlineAverage >= 143) { allowableError = 57; errorMessage = '二氧化硫 143mg/m³ ≤ 浓度 < 715mg/m³'; documentError = '绝对误差≤±57mg/m³'; } 
+            else if (onlineAverage >= 57) { allowableErrorPercentage = 30; isRelativeError = true; errorMessage = '二氧化硫 57mg/m³ ≤ 浓度 < 143mg/m³'; documentError = '相对误差≤±30%'; } 
+            else { allowableError = 17; errorMessage = '二氧化硫 浓度 < 57mg/m³'; documentError = '绝对误差≤±17mg/m³'; }
+        } else if (project === 'no2') {
+            if (onlineAverage >= 513) { allowableErrorPercentage = 15; isRelativeError = true; errorMessage = '氮氧化物 浓度≥513mg/m³'; documentError = '相对误差≤15%'; } 
+            else if (onlineAverage >= 103) { allowableError = 41; errorMessage = '氮氧化物 103mg/m³ ≤ 浓度 < 513mg/m³'; documentError = '绝对误差≤±41mg/m³'; } 
+            else if (onlineAverage >= 41) { allowableErrorPercentage = 30; isRelativeError = true; errorMessage = '氮氧化物 41mg/m³ ≤ 浓度 < 103mg/m³'; documentError = '相对误差≤±30%'; } 
+            else { allowableError = 12; errorMessage = '氮氧化物 浓度 < 41mg/m³'; documentError = '绝对误差≤±12mg/m³'; }
+        } else if (project === 'flow_rate') {
+            if (onlineAverage > 10) { allowableErrorPercentage = 10; isRelativeError = true; errorMessage = '烟气流速 > 10m/s'; documentError = '相对误差≤10%'; } 
+            else { allowableErrorPercentage = 12; isRelativeError = true; errorMessage = '烟气流速 ≤ 10m/s'; documentError = '相对误差≤12%'; }
+        } else if (project === 'temperature') {
+            allowableError = 3; errorMessage = '烟气温度'; documentError = '绝对误差≤±3°C';
+        } else if (project === 'oxygen') {
+            if (onlineAverage > 5.0) { allowableErrorPercentage = 15; isRelativeError = true; errorMessage = '含氧量 > 5%'; documentError = '相对误差≤15%'; } 
+            else { allowableError = 1.0; errorMessage = '含氧量 ≤ 5%'; documentError = '绝对误差≤±1.0%'; }
+        } else if (project === 'humidity') {
+            if (onlineAverage > 5.0) { allowableErrorPercentage = 25; isRelativeError = true; errorMessage = '含湿量 > 5%'; documentError = '相对误差≤25%'; } 
+            else { allowableError = 1.5; errorMessage = '含湿量 ≤ 5%'; documentError = '绝对误差≤±1.5%'; }
+        } else if (project === 'particles') {
+            if (onlineAverage >= 200) { allowableErrorPercentage = 15; isRelativeError = true; errorMessage = '颗粒物 浓度≥200mg/m³'; documentError = '相对误差≤15%'; } 
+            else if (onlineAverage >= 100) { allowableError = 2; errorMessage = '颗粒物 100mg/m³ ≤ 浓度 < 200mg/m³'; documentError = '绝对误差≤±2mg/m³'; } 
+            else if (onlineAverage >= 50) { allowableErrorPercentage = 25; isRelativeError = true; errorMessage = '颗粒物 50mg/m³ ≤ 浓度 < 100mg/m³'; documentError = '相对误差≤25%'; } 
+            else if (onlineAverage >= 20) { allowableErrorPercentage = 30; isRelativeError = true; errorMessage = '颗粒物 20mg/m³ ≤ 浓度 < 50mg/m³'; documentError = '相对误差≤30%'; } 
+            else { allowableError = 6; errorMessage = '颗粒物 浓度 < 20mg/m³'; documentError = '绝对误差≤±6mg/m³'; }
+        } else if (project === 'other_gas') {
+            allowableErrorPercentage = 15; isRelativeError = true; errorMessage = '其它气态污染物'; documentError = '相对误差≤15%';
+        }
+        
+        let error = isRelativeError ? Math.abs((onlineAverage - personalMeasurement) / personalMeasurement) * 100 : Math.abs(onlineAverage - personalMeasurement);
+
+        let output = `
+            <strong>结果详情：</strong><br>
+            在线测量平均值: ${onlineAverage.toFixed(5)}<br>
+            本人测量值: ${personalMeasurement.toFixed(5)}<br>
+            文档要求: ${documentError}<br>
+            计算误差: ${isRelativeError ? error.toFixed(2) + '%' : error.toFixed(5)}<br>
+            所属范围: ${errorMessage}<br>
+        `;
+
+        let isQualified = isRelativeError ? (error <= allowableErrorPercentage) : (error <= allowableError);
+        output += isQualified ? `<span style="color: green; font-weight: bold;">合格</span>` : `<span style="color: red; font-weight: bold;">不合格</span>`;
+        
+        comparisonResultEl.innerHTML = output;
+    });
+
 });

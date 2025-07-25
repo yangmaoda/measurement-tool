@@ -1,18 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Measurement Comparison Tool</title>
+    <title>多功能测量工具</title>
     <link rel="stylesheet" href="style.css">
     <script defer src="script.js"></script>
 </head>
 <body>
-    <h1>Measurement Comparison Tool</h1>
+    <h1>多功能测量工具</h1>
 
-    <!-- Form for entering measurements -->
-    <form id="measurementForm">
-        <label for="project">选择测量项目:</label>
+    <div class="main-selector">
+        <label for="project">选择功能:</label>
         <select id="project" name="project">
             <option value="so2">二氧化硫</option>
             <option value="no2">氮氧化物</option>
@@ -22,29 +21,69 @@
             <option value="humidity">含湿量</option>
             <option value="particles">颗粒物</option>
             <option value="other_gas">其它气态污染物</option>
+            <option value="conversion">烟气折算与计算</option>
         </select>
+    </div>
 
-        <label for="online1">在线测量 1:</label>
-        <input type="number" id="online1" step="any" required>
 
-        <label for="online2">在线测量 2:</label>
-        <input type="number" id="online2" step="any" required>
+    <!-- 工具一：测量比对工具 (默认显示) -->
+    <div id="comparisonTool">
+        <form id="measurementForm">
+            <label for="online1">在线测量 1:</label>
+            <input type="number" id="online1" step="any" required>
 
-        <label for="online3">在线测量 3:</label>
-        <input type="number" id="online3" step="any" required>
+            <label for="online2">在线测量 2:</label>
+            <input type="number" id="online2" step="any" required>
 
-        <label for="online4">在线测量 4:</label>
-        <input type="number" id="online4" step="any" required>
+            <label for="online3">在线测量 3:</label>
+            <input type="number" id="online3" step="any" required>
 
-        <label for="online5">在线测量 5:</label>
-        <input type="number" id="online5" step="any" required>
+            <label for="online4">在线测量 4:</label>
+            <input type="number" id="online4" step="any" required>
 
-        <label for="personal">本人测量:</label>
-        <input type="number" id="personal" step="any" required>
+            <label for="online5">在线测量 5:</label>
+            <input type="number" id="online5" step="any" required>
 
-        <button type="submit">提交</button>
-    </form>
+            <label for="personal">本人测量:</label>
+            <input type="number" id="personal" step="any" required>
 
-    <p id="result"></p>
+            <button type="submit">提交比对</button>
+        </form>
+        <p id="comparisonResult"></p>
+    </div>
+
+
+    <!-- 工具二：烟气折算与计算 (默认隐藏) -->
+    <div id="conversionTool" style="display: none;">
+        <!-- 计算项一：约分计算 -->
+        <form id="roundingForm">
+            <h2>第一项：约分计算器</h2>
+            <p class="description">根据“四舍六入五成双”规则进行修约取整。</p>
+            <label for="roundingInput">输入要修约的数值:</label>
+            <input type="number" id="roundingInput" step="any" required>
+            <button type="submit">计算约分</button>
+        </form>
+        <p id="roundingResult"></p>
+
+        <hr>
+
+        <!-- 计算项二：烟气折算 -->
+        <form id="noxConversionForm">
+            <h2>第二项：氮氧化物折算</h2>
+            <p class="description">根据公式 (21-基准氧)/(21-实测氧) * 实测数 进行计算。</p>
+            <label for="standardOxygen">输入基准氧含量(%):</label>
+            <input type="number" id="standardOxygen" step="any" required>
+
+            <label for="measuredOxygen">输入实测氧含量(%):</label>
+            <input type="number" id="measuredOxygen" step="any" required>
+
+            <label for="measuredValue">输入氮氧化物实测数值:</label>
+            <input type="number" id="measuredValue" step="any" required>
+
+            <button type="submit">计算折算值</button>
+        </form>
+        <p id="noxResult"></p>
+    </div>
+
 </body>
 </html>
