@@ -55,21 +55,10 @@
 
     <!-- 工具二：烟气折算与计算 (默认隐藏) -->
     <div id="conversionTool" style="display: none;">
-        <!-- 计算项一：约分计算 -->
-        <form id="roundingForm">
-            <h2>第一项：约分计算器</h2>
-            <p class="description">根据“四舍六入五成双”规则进行修约取整。</p>
-            <label for="roundingInput">输入要修约的数值:</label>
-            <input type="number" id="roundingInput" step="any" required>
-            <button type="submit">计算约分</button>
-        </form>
-        <p id="roundingResult"></p>
 
-        <hr>
-
-        <!-- 计算项二：烟气折算 -->
+        <!-- 计算项一：烟气折算 -->
         <form id="noxConversionForm">
-            <h2>第二项：氮氧化物折算</h2>
+            <h2>氮氧化物折算</h2>
             <p class="description">根据公式 (21-基准氧)/(21-实测氧) * 实测数 进行计算。</p>
             <label for="standardOxygen">输入基准氧含量(%):</label>
             <input type="number" id="standardOxygen" step="any" required>
@@ -83,6 +72,19 @@
             <button type="submit">计算折算值</button>
         </form>
         <p id="noxResult"></p>
+
+        <hr>
+
+        <!-- 计算项二：约分计算 -->
+        <form id="roundingForm">
+            <h2>约分计算器</h2>
+            <p class="description">根据“四舍六入五成双”规则进行修约取整。</p>
+            <label for="roundingInput">输入要修约的数值:</label>
+            <input type="number" id="roundingInput" step="any" required>
+            <button type="submit">计算约分</button>
+        </form>
+        <p id="roundingResult"></p>
+
     </div>
 
 </body>
