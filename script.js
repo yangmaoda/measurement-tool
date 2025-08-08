@@ -1,3 +1,5 @@
+
+
 document.addEventListener('DOMContentLoaded', function() {
 
     // --- DOM 元素获取 ---
@@ -27,6 +29,10 @@ document.addEventListener('DOMContentLoaded', function() {
         comparisonResultEl.innerHTML = '';
         roundingResultEl.innerHTML = '';
         noxResultEl.innerHTML = '';
+
+        // 清空输入框内容
+        const inputs = document.querySelectorAll('input[type="number"], input[type="text"]');
+        inputs.forEach(input => input.value = '');
 
         if (projectSelect.value === 'conversion') {
             comparisonToolDiv.style.display = 'none';
