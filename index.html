@@ -1,93 +1,126 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>多功能测量工具</title>
-    <link rel="stylesheet" href="style.css">
-    <script defer src="script.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>多功能测量工具</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- 先加载 Tesseract.js（UMD） -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <!-- 再加载你的主脚本（defer） -->
+  <script defer src="script.js"></script>
 </head>
 <body>
-    <h1>多功能测量工具</h1>
+  <h1>多功能测量工具</h1>
 
-    <div class="main-selector">
-        <label for="project">选择功能:</label>
-        <select id="project" name="project">
-            <option value="so2">二氧化硫</option>
-            <option value="no2">氮氧化物</option>
-            <option value="flow_rate">烟气流速</option>
-            <option value="temperature">烟气温度</option>
-            <option value="oxygen">含氧量</option>
-            <option value="humidity">含湿量</option>
-            <option value="particles">颗粒物</option>
-            <option value="other_gas">其它气态污染物</option>
-            <option value="conversion">烟气折算与计算</option>
+  <div class="main-selector">
+    <label for="project">选择功能:</label>
+    <select id="project" name="project">
+      <option value="so2">二氧化硫</option>
+      <option value="no2">氮氧化物</option>
+      <option value="flow_rate">烟气流速</option>
+      <option value="temperature">烟气温度</option>
+      <option value="oxygen">含氧量</option>
+      <option value="humidity">含湿量</option>
+      <option value="particles">颗粒物</option>
+      <option value="other_gas">其它气态污染物</option>
+      <option value="conversion">烟气折算与计算</option>
+      <option value="ocr">图片→数字（OCR）</option>
+    </select>
+  </div>
+
+  <!-- 工具一：测量比对工具 -->
+  <div id="comparisonTool">
+    <form id="measurementForm">
+      <label for="online1">在线测量 1:</label>
+      <input type="number" id="online1" step="any">
+
+      <label for="online2">在线测量 2:</label>
+      <input type="number" id="online2" step="any">
+
+      <label for="online3">在线测量 3:</label>
+      <input type="number" id="online3" step="any">
+
+      <label for="online4">在线测量 4:</label>
+      <input type="number" id="online4" step="any">
+
+      <label for="online5">在线测量 5:</label>
+      <input type="number" id="online5" step="any">
+
+      <!-- 批量文本框（OCR可写入，人工可修正） -->
+      <label for="onlineBulk">在线测量（批量 / OCR 可写入，空格或换行分隔）：</label>
+      <textarea id="onlineBulk" rows="10" placeholder="示例：14.7 13.3 12.8&#10;或一行一个数字"></textarea>
+
+      <!-- 内嵌 OCR 组件 -->
+      <div id="inlineOcr" class="ocr-inline">
+        <div class="drop">拖拽图片到此，或 <input type="file" id="inlineOcrFile" accept="image/*"></div>
+        <div class="progress"><div id="inlineOcrBar"></div></div>
+        <div id="inlineOcrStatus" class="status"></div>
+      </div>
+
+      <label for="personal">本人测量:</label>
+      <input type="number" id="personal" step="any" required>
+      <button type="submit">提交比对</button>
+    </form>
+    <p id="comparisonResult"></p>
+  </div>
+
+  <!-- 工具二：烟气折算与计算 -->
+  <div id="conversionTool" style="display:none;">
+    <form id="noxConversionForm">
+      <h2>烟气折算</h2>
+      <p class="description">根据公式 (21-基准氧)/(21-实测氧) * 实测数 进行计算。</p>
+      <label for="standardOxygen">输入基准氧含量(%):</label>
+      <input type="number" id="standardOxygen" step="any" required>
+
+      <label for="measuredOxygen">输入实测氧含量(%):</label>
+      <input type="text" id="measuredOxygen" required placeholder="例如: 6.1 / 6.2 / 6.3">
+
+      <label for="measuredValue">输入烟气实测数值:</label>
+      <input type="text" id="measuredValue" required placeholder="例如: 100 / 102 / 105">
+
+      <button type="submit">计算折算值</button>
+    </form>
+    <p id="noxResult"></p>
+
+    <hr>
+
+    <form id="roundingForm">
+      <h2>约分计算器</h2>
+      <p class="description">根据“四舍六入五成双”规则进行修约取整。</p>
+      <label for="roundingInput">输入要修约的数值:</label>
+      <input type="number" id="roundingInput" step="any" required>
+      <button type="submit">计算约分</button>
+    </form>
+    <p id="roundingResult"></p>
+  </div>
+
+  <!-- 工具三：独立 OCR 页 -->
+  <section id="ocrTool" style="display:none; margin-top:16px;">
+    <div id="ocrDrop" style="border:2px dashed #999; border-radius:12px; padding:18px; text-align:center;">
+      拖拽图片到这里，或 <input type="file" id="ocrFile" accept="image/*">
+      <div style="margin-top:8px;">
+        PSM:
+        <select id="ocrPsm">
+          <option value="6">6（多行）</option>
+          <option value="4">4（单列）</option>
+          <option value="3">3（自动）</option>
+          <option value="7" selected>7（单行）</option>
+          <option value="11">11（稀疏文本）</option>
         </select>
+      </div>
+      <div id="ocrProgress" style="height:8px;background:#eee;border-radius:8px;overflow:hidden;margin-top:10px">
+        <div id="ocrBar" style="height:8px;width:0;background:#4a90e2"></div>
+      </div>
+      <div id="ocrStatus" style="margin-top:6px;color:#666;"></div>
     </div>
 
-
-    <!-- 工具一：测量比对工具 (默认显示) -->
-    <div id="comparisonTool">
-        <form id="measurementForm">
-            <label for="online1">在线测量 1:</label>
-            <input type="number" id="online1" step="any" required>
-
-            <label for="online2">在线测量 2:</label>
-            <input type="number" id="online2" step="any" required>
-
-            <label for="online3">在线测量 3:</label>
-            <input type="number" id="online3" step="any" required>
-
-            <label for="online4">在线测量 4:</label>
-            <input type="number" id="online4" step="any" required>
-
-            <label for="online5">在线测量 5:</label>
-            <input type="number" id="online5" step="any" required>
-
-            <label for="personal">本人测量:</label>
-            <input type="number" id="personal" step="any" required>
-
-            <button type="submit">提交比对</button>
-        </form>
-        <p id="comparisonResult"></p>
-    </div>
-
-
-    <!-- 工具二：烟气折算与计算 (默认隐藏) -->
-    <div id="conversionTool" style="display: none;">
-
-        <!-- 计算项一：烟气折算 -->
-        <form id="noxConversionForm">
-            <h2>烟气折算</h2>
-            <p class="description">根据公式 (21-基准氧)/(21-实测氧) * 实测数 进行计算。</p>
-            <label for="standardOxygen">输入基准氧含量(%):</label>
-            <input type="number" id="standardOxygen" step="any" required>
-
-            <label for="measuredOxygen">输入实测氧含量(%):</label>
-            <!-- [修改] type 从 "number" 变为 "text" 以允许输入斜杠 -->
-            <input type="text" id="measuredOxygen" required placeholder="例如: 6.1 / 6.2 / 6.3">
-
-            <label for="measuredValue">输入烟气实测数值:</label>
-            <!-- [修改] type 从 "number" 变为 "text" 以允许输入斜杠 -->
-            <input type="text" id="measuredValue" required placeholder="例如: 100 / 102 / 105">
-
-            <button type="submit">计算折算值</button>
-        </form>
-        <p id="noxResult"></p>
-
-        <hr>
-
-        <!-- 计算项二：约分计算 -->
-        <form id="roundingForm">
-            <h2>约分计算器</h2>
-            <p class="description">根据“四舍六入五成双”规则进行修约取整。</p>
-            <label for="roundingInput">输入要修约的数值:</label>
-            <input type="number" id="roundingInput" step="any" required>
-            <button type="submit">计算约分</button>
-        </form>
-        <p id="roundingResult"></p>
-
-    </div>
-
+    <h4 style="margin-top:14px;">提取结果</h4>
+    <div><b>数字数组：</b> <span id="ocrNums">（等待识别）</span></div>
+    <details style="margin-top:6px;">
+      <summary>原始 OCR 文本（调试用）</summary>
+      <pre id="ocrRaw" style="white-space:pre-wrap"></pre>
+    </details>
+  </section>
 </body>
 </html>
