@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const inlineOcrFile = document.getElementById('inlineOcrFile');
   const inlineOcrStatus = document.getElementById('inlineOcrStatus');
   const inlineOcrBar = document.getElementById('inlineOcrBar');
+  // 【新增】获取内嵌OCR的拖拽区域
+  const inlineOcrDropZone = document.querySelector('#inlineOcr .drop');
 
   // 烟气折算
   const noxConversionForm = document.getElementById('noxConversionForm');
@@ -161,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- 内嵌 OCR：识别后把数字写入批量文本框 ---
   async function runInlineOCR(file) {
-    inlineOcrStatus.textContent = '识别中…';
+    inlineOcrStatus.textContent = `识别中：${file.name}...`;
     inlineOcrBar.style.width = '0%';
 
     const worker = await getOcrWorker();
@@ -191,16 +193,59 @@ document.addEventListener('DOMContentLoaded', function() {
       onlineBulk.value = onlineBulk.value.trim()
         ? (onlineBulk.value.trim() + '\n' + toWrite)
         : toWrite;
-      inlineOcrStatus.textContent = `已识别 ${normalized.length} 个数字，已填入文本框`;
+      inlineOcrStatus.textContent = `文件[${file.name}]已识别 ${normalized.length} 个数字，并填入文本框`;
     } else {
-      inlineOcrStatus.textContent = '未识别到数字';
+      inlineOcrStatus.textContent = `文件[${file.name}]未识别到数字`;
     }
     inlineOcrBar.style.width = '100%';
   }
-  inlineOcrFile?.addEventListener('change', e => {
-    const f = e.target.files?.[0];
-    if (f) runInlineOCR(f);
+
+  // 【修改】重写内嵌OCR的文件处理逻辑以支持多文件
+  const handleInlineOcrFiles = async (files) => {
+    if (!files || files.length === 0) return;
+
+    inlineOcrFile.disabled = true; // 禁用文件输入，防止处理时再次选择
+
+    // 遍历所有文件并依次进行OCR识别
+    for (const file of files) {
+        if (file.type.startsWith('image/')) {
+            await runInlineOCR(file); // 使用await确保文件按顺序处理
+        }
+    }
+
+    inlineOcrStatus.textContent = '所有图片处理完毕。';
+    inlineOcrFile.disabled = false; // 处理完毕后重新启用
+  };
+
+  // 绑定“选择文件”按钮的 change 事件
+  inlineOcrFile?.addEventListener('change', (e) => {
+      handleInlineOcrFiles(e.target.files);
+      // 清空当前值，以便能再次选择相同的文件
+      e.target.value = null;
   });
+
+  // 【新增】为内嵌OCR区域添加拖拽上传功能
+  if (inlineOcrDropZone) {
+      ['dragenter', 'dragover'].forEach(eventName => {
+          inlineOcrDropZone.addEventListener(eventName, (e) => {
+              e.preventDefault();
+              inlineOcrDropZone.style.background = '#f0f8ff'; // 高亮背景
+              inlineOcrDropZone.style.borderColor = '#007BFF'; // 高亮边框
+          });
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+          inlineOcrDropZone.addEventListener(eventName, (e) => {
+              e.preventDefault();
+              inlineOcrDropZone.style.background = ''; // 恢复背景
+              inlineOcrDropZone.style.borderColor = ''; // 恢复边框
+          });
+      });
+
+      inlineOcrDropZone.addEventListener('drop', (e) => {
+          handleInlineOcrFiles(e.dataTransfer.files);
+      });
+  }
 
   // --- 独立 OCR 页：增强版 runOCR ---
   async function runOCR(fileOrCanvas) {

@@ -114,7 +114,13 @@ hr {
 
 /* 内嵌 OCR 组件的简易样式 */
 .ocr-inline .drop{
-  border:1px dashed #999; border-radius:8px; padding:10px; text-align:center; margin-top:6px;
+  border:1px dashed #999;
+  border-radius:8px;
+  padding:10px;
+  text-align:center;
+  margin-top:6px;
+  /* 【新增】增加过渡效果，使高亮更平滑 */
+  transition: background-color 0.2s, border-color 0.2s;
 }
 .ocr-inline .progress{height:6px; background:#eee; border-radius:6px; overflow:hidden; margin-top:6px}
 .ocr-inline .progress>div{height:6px; width:0; background:#4a90e2}
